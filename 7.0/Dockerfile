@@ -74,6 +74,24 @@ COPY ./root/ /
 # Reset permissions of filesystem to default values
 RUN /usr/libexec/container-setup && rpm-file-permissions
 
+
+USER root
+
+# epel,remi
+RUN yum install -y epel-release && \
+    yum install -y http://rpms.famillecollet.com/enterprise/remi-release-7.rpm && \
+    yum clean all && \
+    sed -i -e "s/enabled *= *1/enabled=0/g" /etc/yum.repos.d/epel.repo && \
+    sed -i -e "s/enabled *= *1/enabled=0/g" /etc/yum.repos.d/remi.repo
+
+# libmcrypt, supervisor
+RUN INSTALL_PKGS_2="libmcrypt" && \
+    yum install --enablerepo=epel -y $INSTALL_PKGS_2 && \
+    rpm -V $INSTALL_PKGS_2
+
+RUN yum install -y rh-php70-php-mcrypt && \
+    yum clean all -y
+
 USER 1001
 
 # Set the default CMD to print the usage of the language image
